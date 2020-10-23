@@ -21,46 +21,60 @@ BoxLayout:
     fish_num: fish_number
     dobs: dob
     strains: strain
+    image: image
     
     orientation:'vertical'
-    
+    Image:
+        id: image
+        #source: 'mylogo.png'
+        #size: self.texture_size
     
     MDTextField:
         id: shoal_id
         hint_text: "Whats the shoal ID?"
-        helper_text: "This will disappear when you click off"
+        #helper_text: "This will disappear when you click off"
         helper_text_mode: "on_focus"
         pos_hint: {"center_x": .5, "center_y": .1}
         #text: root.shoal
+        padding_x:
+            [self.center[0] - self._get_text_width(max(self._lines, key=len), self.tab_width, self._label_cached) / 2.0,
+            0] if self.text else [self.center[0], 0]
         
     MDTextField:
         id: fish_number
         hint_text: "Number of fish"
-        helper_text: "This will disappear when you click off"
+        #helper_text: "This will disappear when you click off"
         helper_text_mode: "on_focus"
         pos_hint: {"center_x": .5, "center_y": .25}
         #text: root.fish_num
+        padding_x:
+            [self.center[0] - self._get_text_width(max(self._lines, key=len), self.tab_width, self._label_cached) / 2.0,
+            0] if self.text else [self.center[0], 0]
         
     MDTextField:
         id: dob
         hint_text: "Date of hatching?"
-        helper_text: "This will disappear when you click off"
+        #helper_text: "This will disappear when you click off"
         helper_text_mode: "on_focus"
         pos_hint: {"center_x": .5, "center_y": .4}
-        #text: root.dobs
+        padding_x:
+            [self.center[0] - self._get_text_width(max(self._lines, key=len), self.tab_width, self._label_cached) / 2.0,
+            0] if self.text else [self.center[0], 0]
     
         
     MDTextField:
         id: strain
         hint_text: "What strain?"
-        helper_text: "This will disappear when you click off"
+        #helper_text: "This will disappear when you click off"
         helper_text_mode: "on_focus"
         pos_hint: {"center_x": .5, "center_y": .55}
-        #text: root.strains
+        padding_x:
+            [self.center[0] - self._get_text_width(max(self._lines, key=len), self.tab_width, self._label_cached) / 2.0,
+            0] if self.text else [self.center[0], 0]
     
-    MDFlatButton:
+    MDRaisedButton:
         text: "Create QR Code"
-        text_color: 0, 0, 1, 1
+        #text_color: 0, 0, 1, 1
         pos_hint: {"center_x": .5, "center_y": .8}
         on_press: app.create_qr()
             
@@ -74,6 +88,7 @@ class MainApp(MDApp):
     fish_num = ObjectProperty()
     dobs = ObjectProperty()
     strains = ObjectProperty()
+    image = ObjectProperty()
     
     dialog =None
     
@@ -107,27 +122,40 @@ class MainApp(MDApp):
         path = "./QRCodes//"+str(shoal_text)
         if not os.path.exists(path):
             os.makedirs(path)
-        img.save(os.path.join(path, str(shoal_text)+".png"))
+        img_path = os.path.join(path, str(shoal_text)+".png")
+        img.save(img_path)
+        self.root.image.source = img_path
         self.show_alert_dialog()
             
-    def reset_fields(self):
-        pass
+    def reset_fields(self, instance):
+        self.dialog.dismiss()
+        self.root.shoal.text = ""
+        self.root.fish_num.text = ""
+        self.root.dobs.text = ""
+        self.root.strains.text = ""
+        self.root.image.source = ""
+        
     
     def show_alert_dialog(self):
+        btn1 = MDFlatButton(
+                        text="Exit", text_color=self.theme_cls.primary_color
+                    )
+        btn2 = MDFlatButton(
+                        text="Create Another", text_color=self.theme_cls.primary_color
+                    )
+        
         if not self.dialog:
             self.dialog = MDDialog(
                 text="QRCode successful :)",
-                buttons=[
-                    MDFlatButton(
-                        text="Exit", text_color=self.theme_cls.primary_color
-                    ),
-                    MDFlatButton(
-                        text="Create Another", text_color=self.theme_cls.primary_color
-                    ),
-                ],
-            )
+                buttons=[btn1,
+                    btn2])
         self.dialog.open()
+        btn2.bind(on_press = self.reset_fields)
+        btn1.bind(on_press = self.close_app)
 
-
+    def close_app(self, instance):
+        self.dialog.dismiss()
+        MDApp.get_running_app().stop()
+        
 MainApp().run()
 
