@@ -111,10 +111,10 @@ class MainApp(MDApp):
         """Make qr code"""
         
         
-        shoal_text = self.root.shoal.text
-        fish_number_text = self.root.fish_num.text
-        dob_text = self.root.dobs.text
-        strain_text = self.root.strains.text
+        shoal_text = (self.root.shoal.text).strip()
+        fish_number_text = (self.root.fish_num.text).strip()
+        dob_text = (self.root.dobs.text).strip()
+        strain_text = (self.root.strains.text).strip()
         
         img = qrcode.make({"id":shoal_text, 
                            "total_fish":fish_number_text, 
@@ -122,13 +122,17 @@ class MainApp(MDApp):
                            "strain":strain_text})
         
         """Save qr code in folder called the ID"""
-        path = "./QRCodes//"+str(shoal_text)
+        path = "./QRCodes//"+shoal_text
         if not os.path.exists(path):
             os.makedirs(path)
-        img_path = os.path.join(path, str(shoal_text)+".png")
-        img.save(img_path)
-        self.root.image.source = img_path
-        self.show_alert_dialog()
+        img_path = os.path.join(path, shoal_text+".png")
+        try:
+            img.save(img_path)
+            self.root.image.source = img_path
+            self.show_alert_dialog(True)
+        except:
+            self.show_alert_dialog(False)
+            
             
     def reset_fields(self, instance):
         self.dialog.dismiss()
@@ -139,7 +143,17 @@ class MainApp(MDApp):
         self.root.image.source = ""
         
     
-    def show_alert_dialog(self):
+    def show_alert_dialog(self, success):
+        if success == True:
+            btn1_txt = "Exit"
+            btn2_txt = "Create Another"
+            dialog_txt = "QRCode successful :)"
+        
+        if success == False:
+            btn1_txt = "Exit"
+            btn2_txt = "Try again"
+            dialog_txt = "QRCode unsuccessful"
+            
         btn1 = MDFlatButton(
                         text="Exit", text_color=self.theme_cls.primary_color
                     )
@@ -155,6 +169,8 @@ class MainApp(MDApp):
         self.dialog.open()
         btn2.bind(on_press = self.reset_fields)
         btn1.bind(on_press = self.close_app)
+    
+    
 
     def close_app(self, instance):
         self.dialog.dismiss()
