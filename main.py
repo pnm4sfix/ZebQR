@@ -13,6 +13,7 @@ from kivy.properties import ObjectProperty
 from kivy.properties import StringProperty
 import os
 import qrcode
+import kivymd
 
 KV = '''
 
@@ -94,8 +95,10 @@ class MainApp(MDApp):
     
     def build(self):
         #self.theme_cls.theme_style = "Dark"
-        self.create_img_folder()
-        
+        try:
+            self.create_img_folder()
+        except:
+            print("failed")
         return Builder.load_string(KV)
     
     def create_img_folder(self):
